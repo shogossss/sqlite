@@ -42,44 +42,54 @@
    <div class="row">
      <div class="col-md-12">
        <h1 class="hh1">Tweetliker</h1>
-        <p class="lead">こちらで登録しますか</p>
-        <form class="form-horizontal" action = "/login2" method="post">
-          {% if username,password,cs,ck,at,ats %}
-          <div class="form-group">
-              <span class="input-group-addon">USERNAME</span>
-              <p id=username name="username" placeholder="USERNAME" type="text">{{username}}</p>
+        <p class="lead">ユーザー登録してください</p>
+        {% if message %}
+        <p class="text-danger">{{message}}</p>
+        {% endif %}
+        {% if username,password,cs,ck,at,ats %}
+        <form class="form-horizontal" action = "/login" method="post">
+           <div class="form-group">
+              <label class="sr-only" for="query"></label>
+              <div class="input-group">
+                 <span class="input-group-addon">USERNAME</span>
+                 <input id=username name="username" placeholder="USERNAME" type="text" class="form-control" value={{username}} required/>
+              </div>
             </div>
             <div class="form-group">
+              <div class="input-group">
                  <span class="input-group-addon">PASSWORD</span>
-                 <p id=password name="password" placeholder="PASSWORD" type="text">{{password}}</p>
-
+                 <input id=password name="password" placeholder="PASSWORD" type="text" class="form-control" value={{password}} required/>
+              </div>
            </div>
            <div class="form-group">
+             <div class="input-group">
                 <span class="input-group-addon">CONSUMER_KEY</span>
-                <p id=ck name="ck" placeholder="CONSUMER_KEY" type="text">{{cs}}</p>
-
+                <input id=ck name="ck" placeholder="CONSUMER_KEY" type="text" class="form-control" value={{ck}} required/>
+             </div>
           </div>
           <div class="form-group">
+            <div class="input-group">
                <span class="input-group-addon">CONSUMER_SECRET</span>
-               <p id=cs name="cs" placeholder="CONSUMER_SECRET" type="text">{{ck}}</p>
+               <input id=cs name="cs" placeholder="CONSUMER_SECRET" type="text" class="form-control" value={{cs}} required/>
+            </div>
          </div>
          <div class="form-group">
+           <div class="input-group">
               <span class="input-group-addon">ACCESS_TOKEN</span>
-              <p id=at name="at" placeholder="ACCESS_TOKEN" type="text">{{at}}</p>
+              <input id=at name="at" placeholder="ACCESS_TOKEN" type="text" class="form-control" value={{at}} required/>
+           </div>
           </div>
           <div class="form-group">
+            <div class="input-group">
                <span class="input-group-addon">ACCESS_SECRET</span>
-               <p id=ats name="ats" placeholder="ACCESS_SECRET" type="text">{{ats}}</p>
+               <input id=ats name="ats" placeholder="ACCESS_SECRET" type="text" class="form-control" value={{ats}} required/>
+            </div>
            </div>
            <div class="form-group">
-             <button type="submit" class="btn btn-default" name="button"　id=1>ユーザー登録</button>
+             <button type="submit" class="btn btn-default" name="button" id=1>ユーザー登録</button>
            </div>
-          {% endif %}
         </form>
-        <form class="form-horizontal" action = "/login3" method="post">
-          <div class="form-group">
-            <button type="submit" class="btn btn-default" name="button" value="api" id=1>編集する</button>
-          </div>
+        {% endif %}
       </div>
     </div>
   </div>
