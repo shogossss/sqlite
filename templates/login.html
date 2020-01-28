@@ -42,6 +42,9 @@
    <div class="row">
      <div class="col-md-12">
        <h1 class="hh1">Tweetliker</h1>
+       {% if message2 %}
+       <h2>{{message2}}</h2>
+       {% endif %}
           <form class="form-horizontal" action="/tweet" method="post">
             <h1>ログイン認証</h1>
             <div class="form-group">
