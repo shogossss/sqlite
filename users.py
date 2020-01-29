@@ -3,8 +3,7 @@ Blueprint,render_template,request
 )
 import tweepy,time
 from userdb import get_db,close_db
-global id
-id = 0
+from function import like_tweepy,get_sorted_df,get_grouped_df,get_profile,retweet_tweepy,follow_tweepy,like_tweepy
 
 
 
@@ -31,8 +30,8 @@ def tweet():
                 pass1.append(str(d1["password"]))
                 user1.append(str(d1["username"]))
                 if(str(d1["username"])==username):
+                    global id
                     id = d1["id"]
-
 
             if(password in pass1 and username in user1):
                 d.execute('select id,ck,cs,at,ats from api')
@@ -51,7 +50,10 @@ def tweet():
                 db.commit()
                 close_db()
             # index.html をレンダリングする
-                return render_template('base.html')
+                return render_template('index.html',
+                query = "?",
+                count = "?"
+                )
 
             else :
                 message2='パスワードかusernameが間違っております'
@@ -138,7 +140,7 @@ def login2():
             ats=ACCESS_SECRET
             )
     else:
-        return render_template('base.html')
+        return render_template('login.html')
 
 @bp.route('/login3', methods = ["GET" , "POST"])
 def login3():
@@ -158,14 +160,15 @@ def tweetaction():
        query = request.form['query']# formのname = "query"を取得
        cnt = int(request.form['count'])
        button = request.form['button']
+       userid=id
        posts = []
        try:
            if button == "like":
-               posts = like_tweepy(query,cnt,api,posts)
+               posts = like_tweepy(userid,query,cnt,api,posts)
            if button == "retweet":
-               posts = retweet_tweepy(query,cnt,api,posts)
+               posts = retweet_tweepy(userid,query,cnt,api,posts)
            if button == "follow":
-               posts = follow_tweepy(query,cnt,api,posts)
+               posts = follow_tweepy(userid,query,cnt,api,posts)
            # grouped_df = get_grouped_df(tweets_df)
            # sorted_df = get_sorted_df(tweets_df)
            # 送られてきたものを返すしなきゃ返されない
@@ -182,98 +185,34 @@ def tweetaction():
             messages = "APIが違います"
             title = "APIエラー"
             return render_template(
-            'recheck.html',
-            message = messages,
-            title = title,
-            CONSUMER_KEY = CONSUMER_KEY,
-            CONSUMER_SECRET = CONSUMER_SECRET,
-            ACCESS_TOKEN = ACCESS_TOKEN,
-            ACCESS_SECRET = ACCESS_SECRET
+            'login.html',
+            message2 = messages,
+            title = title
             )
 
     else:
             return render_template('index.html')
 
-def like_tweepy(query,cnt,api,posts):
-    search_results = api.search(q=query, count=cnt)
-    for tweet in search_results:
-        post = {}
-        try:
-            if not "RT @" in tweet.text: #3
-               tweet_id = tweet.id
-               api.create_favorite(tweet_id) #ファボする
-               post["created_at"] = tweet.created_at
-               post["user_id"] = tweet.user.screen_name
-               post["text"] = tweet.text.replace('\n','')
-               post["fav"] = tweet.favorite_count
-               post["retweet"] = tweet.retweet_count
-               post["select"] = "いいね"
-               posts.append(post)
-               time.sleep(2)
-
-        except Exception as e:
-                print(e)
-
-    return posts
-
-def follow_tweepy(query,cnt,api,posts):
-    search_results = api.search(q=query, count=cnt)
-    for tweet in search_results:
-        post = {}
-        try:
-            if not "RT @" in tweet.text: #3
-               user_id = tweet.user._json['id']
-               api.create_friendship(user_id) #ファボする #ファボする
-               post["created_at"] = tweet.created_at
-               post["user_id"] = tweet.user.screen_name
-               post["text"] = tweet.text.replace('\n','')
-               post["fav"] = tweet.favorite_count
-               post["retweet"] = tweet.retweet_count
-               post["select"] = "フォロー"
-               posts.append(post)
-               time.sleep(1)
-
-        except Exception as e:
-            print(e)
-
-    return posts
-
-def retweet_tweepy(query,cnt,api,posts):
-    search_results = api.search(q=query, count=cnt)
-    for tweet in search_results:
-        post = {}
-        try:
-            if not "RT @" in tweet.text: #3
-               tweet_id = tweet.id
-               api.retweet(tweet_id) #ファボする
-               post["created_at"] = tweet.created_at
-               post["user_id"] = tweet.user.screen_name
-               post["text"] = tweet.text.replace('\n','')
-               post["fav"] = tweet.favorite_count
-               post["retweet"] = tweet.retweet_count
-               post["select"] = "リツイート"
-               posts.append(post)
-               time.sleep(1)
-
-        except Exception as e:
-            print(e)
-
-    return posts
-
-def get_profile(user_id):
-   user = api.get_user(screen_name= user_id) #1
-   profile = { #2
-       "id": user.id,
-       "user_id": user_id,
-       "image": user.profile_image_url,
-       "description": user.description # 自己紹介文の取得
-   }
-   return profile #3
-
-def get_grouped_df(tweets_df):
-   grouped_df = tweets_df.groupby(tweets_df.created_at.dt.date).sum().sort_values(by="created_at", ascending=False)
-   return grouped_df
-
-def get_sorted_df(tweets_df):
-   sorted_df = tweets_df.sort_values(by="retweets", ascending=False)
-   return sorted_df
+@bp.route('/logcheck', methods =["GET","POST"])
+def logcheck():
+    db = get_db()
+    c = db.cursor()
+    datas=[]
+    c.execute("select * from tweet")
+    for d3 in c:
+        data = {}
+        if(d3["id"]==id):
+            print(str(d3["created_at"]))
+            data["created_at"] = str(d3["created_at"])
+            data["text"] = str(d3["text"])
+            data["user_id"] = str(d3["user_id"])
+            data["fav"] = str(d3["fav"])
+            data["retweet"] = str(d3["retweet"])
+            data["action"] = str(d3["action"])
+            datas.append(data)
+    print(datas)
+    close_db()
+    return render_template(
+    'logcheck.html',
+    posts=datas
+    )

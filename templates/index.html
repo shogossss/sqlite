@@ -42,12 +42,15 @@ div{
     <h1 class="hh1">Tweetliker</h1>
     <p>調べたい言葉を入れると関連するツイートに三つのアクションをする。</p>
     <p>※カウント数はその時点で可能な数のツイートに対してのみ適応されます</p>
+    <form class="form-horizontal" action = "/logcheck" method="post">
+      <button type="submit" name="button" value="alltweet">今ままでのlog確認</button>
+    </form>
     <!-- コードを追加 返信が来たかどうかの確認-->
     {% if query,count %}
     <p>{{query,count}}</p>
     {% endif %}
     <!-------------------->
-    <form class="form-horizontal" action = "/index" method="post">
+    <form class="form-horizontal" action = "/tweetaction" method="post">
        <div class="form-group">
           <label class="sr-only" for="query"></label>
           <div class="input-group">
