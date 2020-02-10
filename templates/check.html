@@ -41,7 +41,7 @@
   <div class="container">
    <div class="row">
      <div class="col-md-12">
-       <h1 class="hh1" href="{{url_for('users.index')}}">Tweetliker</h1>
+       <h1 class="hh1"> <a href="{{url_for('users.index')}}">Tweetliker</a></h1>
         <p class="lead">こちらで登録しますか</p>
         <form class="form-horizontal" action = "/login2" method="post">
           {% if username,password,cs,ck,at,ats %}

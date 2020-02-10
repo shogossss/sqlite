@@ -5,7 +5,6 @@
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <title>ログイン</title>
-
     <link href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.1/css/bootstrap.min.css";; rel="stylesheet">
     <link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.2.0/css/all.css" integrity="sha384-hWVjflwFxL6sNzntih27bfxkr27PmbbK/iSvJ+a4+0owXq79v+lsFkW54bOGbiDQ" crossorigin="anonymous">
     <link rel="stylesheet" type="text/css" href="{{url_for('static', filename='style.css')}}" />
@@ -49,7 +48,10 @@
             <h1>ログイン認証</h1>
             <div class="form-group">
               <input type="text" name="username" placeholder="USERNAME" required/>
-              <input type="text" name="pass" placeholder="PASSWORD" required/>
+              <input type="password" name="pass" placeholder="PASSWORD" required/>
+              <span class="field-icon">
+                  <i toggle="password-field" class="mdi mdi-eye toggle-password"></i>
+              </span>
             </div>
             <div class="form-group">
               <button type="submit" class="btn btn-default" name="button" value="login" id=1>ログイン</button>
@@ -61,5 +63,21 @@
         </div>
       </div>
     </div>
+  <script>
+  // パスワードの表示・非表示切替
+  $(".toggle-password").click(function () {
+    // iconの切り替え
+    $(this).toggleClass("mdi-eye mdi-eye-off");
+
+    // 入力フォームの取得
+    var input = $(this).parent().prev("input");
+    // type切替
+    if (input.attr("type") == "password") {
+        input.attr("type", "text");
+    } else {
+        input.attr("type", "password");
+    }
+  });
+  </script>
 </body>
 </html>

@@ -4,9 +4,8 @@ Blueprint,render_template,request
 import tweepy,time
 from userdb import get_db,close_db
 from function import like_tweepy,get_sorted_df,get_grouped_df,get_profile,retweet_tweepy,follow_tweepy,like_tweepy
-
-
-
+from werkzeug.security import generate_password_hash, check_password_hash
+import  pandas as pd
 bp = Blueprint('users', __name__)
 @bp.route('/')
 def index():
@@ -85,6 +84,7 @@ def login():
             global username,password,CONSUMER_KEY,CONSUMER_SECRET,ACCESS_TOKEN,ACCESS_SECRET
             username = request.form['username']
             password = request.form['password']
+            password = generate_password_hash(str(password), method='sha256')
             CONSUMER_KEY  = request.form['ck']
             CONSUMER_SECRET = request.form['cs']
             ACCESS_TOKEN = request.form['at']
@@ -210,9 +210,125 @@ def logcheck():
             data["retweet"] = str(d3["retweet"])
             data["action"] = str(d3["action"])
             datas.append(data)
-    print(datas)
     close_db()
     return render_template(
     'logcheck.html',
     posts=datas
     )
+
+@bp.route('/anary', methods =["GET","POST"])
+def anarylog():
+    # db = get_db()
+    # c = db.cursor()
+    # datas=[]
+    # c.execute("select * from tweet")
+    # for d3 in c:
+    #     data = {}
+    #     if(d3["id"]==id):
+    #         print(str(d3["created_at"]))
+    #         data["created_at"] = str(d3["created_at"])
+    #         data["text"] = str(d3["text"])
+    #         data["user_id"] = str(d3["user_id"])
+    #         data["fav"] = str(d3["fav"])
+    #         data["retweet"] = str(d3["retweet"])
+    #         data["action"] = str(d3["action"])
+    #         datas.append(data)
+    # close_db()
+    return render_template(
+    'anary.html',
+    # posts=datas
+    )
+
+columns = [
+   "tweet_id",
+   "created_at",
+   "text",
+   "fav",
+   "retweets"
+   ]
+
+@bp.route('/anary2', methods = ["GET" , "POST"])
+def anary():
+   if request.method == 'POST':
+       user_id = request.form['user_id']
+       tweets_df = get_tweets_df(user_id)
+       grouped_df = get_grouped_df(tweets_df)
+       sorted_df = get_sorted_df(tweets_df)
+       return render_template(
+           'anary.html',
+           profile=get_profile(user_id),
+           tweets_df = tweets_df,
+           grouped_df = grouped_df,
+           sorted_df = sorted_df
+           )
+   else:
+       return render_template('anary.html')
+
+def get_tweets_df(user_id):
+   tweets_df = pd.DataFrame(columns=columns) #1
+   for tweet in tweepy.Cursor(api.user_timeline,screen_name = user_id, exclude_replies = True).items(): #2
+       try:
+           if not "RT @" in tweet.text: #3
+               se = pd.Series([ #4
+                       tweet.id,
+                       tweet.created_at,
+                       tweet.text.replace('\n',''),
+                       tweet.favorite_count,
+                       tweet.retweet_count
+                   ]
+                   ,columns
+                   )
+               tweets_df = tweets_df.append(se,ignore_index=True) #5
+       except Exception as e:
+           print (e)
+   tweets_df["created_at"] = pd.to_datetime(tweets_df["created_at"]) #6
+   return tweets_df #7
+
+def get_profile(user_id):
+   user = api.get_user(screen_name= user_id) #1
+   profile = { #2
+       "id": user.id,
+       "user_id": user_id,
+       "image": user.profile_image_url,
+       "description": user.description # 自己紹介文の取得
+   }
+   return profile #3
+
+def get_grouped_df(tweets_df):
+   grouped_df = tweets_df.groupby(tweets_df.created_at.dt.date).sum().sort_values(by="created_at", ascending=False)
+   return grouped_df
+
+def get_sorted_df(tweets_df):
+   sorted_df = tweets_df.sort_values(by="retweets", ascending=False)
+   return sorted_df
+
+# @bp.route('/anary', methods =["GET","POST"])
+# def anary():
+#     db = get_db()
+#     c = db.cursor()
+#     datas=[]
+#     c.execute("select * from tweet")
+#     for d3 in c:
+#         data = {}
+#         if(d3["id"]==id):
+#             print(str(d3["created_at"]))
+#             data["created_at"] = str(d3["created_at"])
+#             data["text"] = str(d3["text"])
+#             data["user_id"] = str(d3["user_id"])
+#             data["fav"] = str(d3["fav"])
+#             data["retweet"] = str(d3["retweet"])
+#             data["action"] = str(d3["action"])
+#             datas.append(data)
+#     close_db()
+#     return render_template(
+#     'anary.html',
+#     posts=datas
+#     )
+#
+# @bp.route('/tweetlog', methods = ["GET" , "POST"])
+# def tweetlog():
+#    if request.method == 'POST':
+#        user_id = request.form['user_id'] # formのname = "user_id"を取得
+#        return render_template('anary.html', user_id = user_id)
+#    else:
+#        return render_template('anary.html')
