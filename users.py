@@ -254,12 +254,14 @@ def anary():
        tweets_df = get_tweets_df(user_id)
        grouped_df = get_grouped_df(tweets_df)
        sorted_df = get_sorted_df(tweets_df)
+       sorted_df2 = get_sorted_df2(tweets_df)
        return render_template(
            'anary.html',
            profile=get_profile(user_id),
            tweets_df = tweets_df,
            grouped_df = grouped_df,
-           sorted_df = sorted_df
+           sorted_df = sorted_df,
+           sorted_df2 = sorted_df2
            )
    else:
        return render_template('anary.html')
@@ -299,8 +301,13 @@ def get_grouped_df(tweets_df):
    return grouped_df
 
 def get_sorted_df(tweets_df):
+   sorted_df = tweets_df.sort_values(by="fav", ascending=False)
+   return sorted_df
+
+def get_sorted_df2(tweets_df):
    sorted_df = tweets_df.sort_values(by="retweets", ascending=False)
    return sorted_df
+
 
 # @bp.route('/anary', methods =["GET","POST"])
 # def anary():

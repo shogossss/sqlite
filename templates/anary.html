@@ -82,14 +82,19 @@ div{
    </div>
    <div class= "col-md-8">
    {% if profile %}
-   <div>もっともリツイート・いいねされたツイート</div>
+   <form name="sample">
+       <input type="button" name="button" value="もっともいいね" onClick="linkCheck(1)">
+       <input type="button" name="button" value="もっともリツイート" onClick="linkCheck(2)" >
+   </form>
+   <!-- <div>もっともリツイート・いいねされたツイート</div> -->
+   
    {% for index, row in sorted_df.iterrows() %}
      <div class="white-container">
        <div>{{row["created_at"]}}</div>
        <div id="tweet-text">{{row["text"]}}</div>
        <div>
          <span><i class="far fa-heart"></i>  {{row["fav"]}}</span> <span><i class="fas fa-retweet"></i>  {{row["retweets"]}}</span>
-         <a class="pull-right">ツイートを見る</a>
+         <a class="pull-right" href="https://twitter.com/{{profile.user_id}}/status/{{row["tweet_id"]}} ">ツイートを見る</a>
        </div>
      </div>
    {% endfor %}
